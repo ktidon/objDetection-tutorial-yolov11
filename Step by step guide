@@ -1,0 +1,68 @@
+Yolov11
+
+You Only Look Once (YOLO) is one of the leading real-time object detection algorithms. Introduced in 2015, it is tested as one of the fastest, processing images in a single pass. YOLO divides the image into an NxN grid where each cell is responsible for predicting bounding boxes and image class probabilities.
+
+Here is a short guide on how to use YoloV11 for object classification.
+
+
+1) Datasets
+
+This is one of the most vital parts of any machine learning model; vital enough to even say that your dataset can make or break your model. Another thing to keep in mind is that your dataset must be aligned with the goal of your model. That is, if you plan to detect a specific kind of object, your dataset must encapsulate those specific features. Kaggle.com provides different kinds of free datasets.
+
+
+2) Data annotation
+
+Object identification relies on labeled data. In this step, we annotate data with bounding boxes in a format that the model will recognize and can train on. For this guide, we will use Roboflow in assisting us to annotate data. This site also divides the datasets into training, validation, and test datasets.
+
+After annotation, download your dataset and make sure to click on “Show download code” and save the code for later. 
+
+
+3) Google Collab
+
+Although you can use your own workstation to train models, this guide will use Google Colab. In your Colab notebook, enter the following blocks of code:
+
+To install yolo:
+//
+#Change your runtime to a T4 GPU
+!pip install ultralytics
+//
+
+To download the annotated dataset from Roboflow, simply copy-paste the download code. It should look something like this.
+
+//
+#typically you dont have to change any code here. Simply copy-paste the download code from https://roboflow.com/
+
+!pip install roboflow
+
+from roboflow import Roboflow
+rf = Roboflow(api_key="<API-Key>") #Do not share your API key with others outside your workspace
+project = rf.workspace("<workspace_name>").project("<project_name>")
+version = project.version(1)
+dataset = version.download("yolov11")
+//
+
+To train yolov11 on your dataset:
+//
+!yolo detect train data=/content/Chess-1/data.yaml model=yolo11s.pt epochs=200 imgsz=640
+#here we are using yolo11-small which has a good balance between speed and accuracy
+//
+
+Note: it is important to set the image size to 640. You can manually set the number of epochs but training may automatically stop early when no more improvements are observed. After training, the model outputs the best weights and the last weights.
+
+To use your trained model, create a new folder under the contents folder and upload the images you want to test on. Here we will use the last weights:
+
+//
+from ultralytics import YOLO
+model = YOLO("/content/runs/detect/train/weights/last.pt") #you may also use best.pt
+
+source = "<path/to/dir>" #path of folder that contains the images you want to use your model on. I usually put mine under contents 
+
+import os
+results = model(source, save = True, imgsz = 320) #this saves your images with bounding boxes in the notebook
+//
+
+4) Model evalution. 
+
+Under contents/train//…. You will find metrics to help you evaluate your model. These include the precision curve, recall curve, confusion matrices, loss functions, etc.
+
+ 
